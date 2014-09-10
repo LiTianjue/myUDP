@@ -91,7 +91,8 @@ again:
 //			recvflag = 0;
 //		else
 //			recvflag = IPC_NOWAIT;
-
+		//睡眠１００s等待消息队列满
+		sleep(100);
 		if((n = msgrcv(mqid,buff,MAXMSG,pack_move,IPC_NOWAIT)) < 0)
 		//if((n = msgrcv(mqid,buff,MAXMSG,pack_move,0)) < 0)
 		{
