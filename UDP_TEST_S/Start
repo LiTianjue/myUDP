@@ -1,0 +1,4 @@
+#!/bin/bash
+touch /tmp/test1
+./msgrmid /tmp/test1
+./Sudp &

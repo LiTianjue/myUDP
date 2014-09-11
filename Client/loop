@@ -1,0 +1,6 @@
+#!/bin/bash
+while true
+do
+	/root/Client/Tex/Client/Cudp /root/SendTestB/
+	sleep 5
+done
