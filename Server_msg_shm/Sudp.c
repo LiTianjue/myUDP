@@ -136,7 +136,7 @@ int main()
 		}
 		only = 0;
 	}
-	usleep(200);
+	//usleep(200);
 
 	
 	save = 0;
@@ -158,10 +158,19 @@ int main()
 		num = recvfrom(sockfd,msg,MAXDATASIZE,0,(struct sockaddr *)&client,&sin_size);
 		if(num < 0)
 		{
-			printf("recvfrom error.\n");
+			//printf("recvfrom error.\n");
+			sprintf(main_log,"Recvfrom error :%s",strerror(errno));
+			WriteSysLog(LOG_PATH,main_log);
 		}
 		
 		msgbuf = calloc(sizeof(long) + num,sizeof(char));
+		if(msgbuf == NULL)
+		{
+			sprintf(main_log,"calloc error :%s",strerror(errno));
+			WriteSysLog(LOG_PATH,main_log);
+			exit(-1);
+		}
+
 		memcpy(msgbuf->mtext,msg,num);
 		
 		long long pack_nu;

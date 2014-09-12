@@ -91,7 +91,7 @@ again:
 //			recvflag = 0;
 //		else
 //			recvflag = IPC_NOWAIT;
-
+//
 		if((n = msgrcv(mqid,buff,MAXMSG,pack_move,IPC_NOWAIT)) < 0)
 		//if((n = msgrcv(mqid,buff,MAXMSG,pack_move,0)) < 0)
 		{
@@ -108,8 +108,21 @@ again:
 
 		msg = buff->mtext;
 
-		if(pack_saved == 0)
+		if((pack_saved == 0)||(pack_move == 2))
 		{
+			if((pack_move == 2)&&(pack_saved !=0))
+			{
+				sprintf(log,"A file is incomplete because client stop transmite by accident\n");
+				WriteSysLog(LOG_PATH,log);
+
+				pack_saved = 0;
+				if(fp != NULL)
+				{
+					fclose(fp);
+					fp = NULL;
+				}
+			}
+
 			memcpy(&file_size,msg+10,8);
 			pack_total = file_size/1024;
 			if(file_size%1024 != 0)
@@ -144,9 +157,14 @@ again:
 			fp = fopen(save_path,"w+");
 			if(fp == NULL)
 			{
-				sprintf(log,"Open %s error:%s",file_name,strerror(errno));
+				sprintf(log,"Open %s error:%s",file_name,strerror(errno)); 
 				WriteSysLog(LOG_PATH,log);
  				goto err_end;
+			}
+			else
+			{
+				sprintf(log,"Open file:%s",save_path);
+				WriteSysLog(LOG_PATH,log);
 			}
 		}
 
@@ -166,7 +184,17 @@ again:
 		*/
 
 		gettimeofday(&time1,NULL);
-		fwrite(pack,sizeof(char),pack_length,fp);
+		if(fwrite(pack,sizeof(char),pack_length,fp) !=pack_length)
+		{
+			if(fp == NULL)
+			{
+				sprintf(log,"fp is NULL\n");
+				WriteSysLog(LOG_PATH,log);
+			}
+			sprintf(log,"Write %s error:%s",file_name,strerror(errno));
+			WriteSysLog(LOG_PATH,log);
+			goto err_end;
+		}
 		/*
 		if((pack_move%10) == 0)
 			fflush(fp);
@@ -183,13 +211,19 @@ again:
 		{
 			gettimeofday(&time5,NULL);
 			sync();
+			fflush(NULL);
 			//fflush(NULL);
 			//remove(file_name);
 			fclose(fp);
+			fp = NULL;
 			remove(save_path);
 			//printf("--andy===>>file complety\n");
 			//close(fd);
+			sprintf(log,"File %s trainsport complete!!!",file_name);
+			WriteSysLog(LOG_PATH,log);
+
 			free(file_name);
+
 
 			gettimeofday(&time6,NULL);
 			Time4 = 1000000*(time6.tv_sec - time5.tv_sec) + (time6.tv_usec - time5.tv_usec);
@@ -206,7 +240,10 @@ again:
 			sprintf(log,"====lost package====File %s is incomplete",file_name);
 			WriteSysLog(LOG_PATH,log);
 			//close(fd);
+			sync();
+			fflush(NULL);
 			fclose(fp);
+			fp = NULL;
 			remove(save_path);
 			free(file_name);
 			goto again;
