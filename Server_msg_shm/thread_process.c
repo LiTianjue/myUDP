@@ -161,11 +161,6 @@ again:
 				WriteSysLog(LOG_PATH,log);
  				goto err_end;
 			}
-			else
-			{
-				sprintf(log,"Open file:%s",save_path);
-				WriteSysLog(LOG_PATH,log);
-			}
 		}
 
 //		Time0 = 1000000*(time1.tv_sec - startTime.tv_sec) + (time1.tv_usec - startTime.tv_usec);
@@ -184,14 +179,12 @@ again:
 		*/
 
 		gettimeofday(&time1,NULL);
-		if(fwrite(pack,sizeof(char),pack_length,fp) !=pack_length)
+
+		int n = fwrite(pack,sizeof(char),pack_length,fp);
+		if(n != pack_length)
 		{
-			if(fp == NULL)
-			{
-				sprintf(log,"fp is NULL\n");
-				WriteSysLog(LOG_PATH,log);
-			}
-			sprintf(log,"Write %s error:%s",file_name,strerror(errno));
+			sprintf(log,"Write %s error:%s\n->strlen(pack)=%d\n->pack_length=%d\n->n = %d\n->move_pack=%d\n->file_size=%lld\npack_totle=%d\n,file_name_length=%d\n",
+					file_name,strerror(errno),strlen(pack),pack_length,n,pack_move,file_size,pack_total,file_name_length);
 			WriteSysLog(LOG_PATH,log);
 			goto err_end;
 		}
@@ -219,8 +212,6 @@ again:
 			remove(save_path);
 			//printf("--andy===>>file complety\n");
 			//close(fd);
-			sprintf(log,"File %s trainsport complete!!!",file_name);
-			WriteSysLog(LOG_PATH,log);
 
 			free(file_name);
 

@@ -28,14 +28,14 @@ int SendPack(char *file_path,int sockfd,const struct sockaddr *pservaddr,socklen
 	char protocol = '\014';
 	long long pack_nu = 0;
 	long long file_size;
-	char file_name_length = strlen(file_path);
+	int file_name_length = strlen(file_path);
 	char *file_name;
 	int pack_length;
 	char *pack;
 
 	file_size = GetFileSize(file_path);
 
-	msg_len = 1 + 1 + 8 + 8 + 1 +file_name_length + 4 + MAXLINE;
+	msg_len = 1 + 1 + 8 + 8 + 4 +file_name_length + 4 + MAXLINE;
 
 	msg = malloc(msg_len);
 	file_name = strdup(file_path);
@@ -44,7 +44,7 @@ int SendPack(char *file_path,int sockfd,const struct sockaddr *pservaddr,socklen
 	memcpy(msg,&version,1);
 	// +3 is pack_nu
 	memcpy(msg +10,&file_size,8);
-	memcpy(msg + 18,&file_name_length,1);
+	memcpy(msg + 18,&file_name_length,4);
 	memcpy(msg + 22,file_name,file_name_length);
 
 	/*

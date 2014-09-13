@@ -55,6 +55,7 @@ int main(int argc,char **argv)
 	}
 
 	printf("Read wait time = %d\n",WAIT_TIME);
+	printf("Read pack_t = %d\n",PACK_T);
 
 
 	//测试发送的文件
