@@ -95,6 +95,8 @@ int main(int argc,char **argv)
 
 		SendPack(file_path,sockfd,(struct sockaddr *)&servaddr,sizeof(servaddr));
 
+		sleep(2);
+
 		printf("done!\n");
 		printf("--------------\n\n");
 		fflush(NULL);
